@@ -8,6 +8,7 @@ firebase-debug.log*
 
 # Firebase cache
 .firebase/
+keys/
 
 # Firebase config
 
