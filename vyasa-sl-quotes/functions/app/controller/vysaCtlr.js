@@ -22,10 +22,10 @@ const vyasaServicesController = {
             // query for all the records from db and send it back.
             const quoteRef = db.collection("quotes")
                 // .where("deviceId", "==", req.query.deviceId)
-                .limit(1)
+           //     .limit(1)
             quoteRef.get().
             then(quoteQS => {
-                let myResponse = quoteQS.docs[0].data();
+                let myResponse = [quoteQS.docs[0].data()];
                 console.log(`data from firestore db ${myResponse}`)
                 res.json(myResponse)
             })
@@ -94,6 +94,56 @@ const vyasaServicesController = {
 
 
     },
+
+    // notify through  push noification about a new cycle quote.
+
+    notifyNewCycleQuote :  function(req,res,db){
+
+        let notifyRunResponse = {status: 'OK',
+                                 message : `notication run at ${new Date()}`}
+
+                            
+        // daily  notification logic
+
+        // step1 1. Get all the zones from 
+
+        const vyasaZoneRef = db.collection("vyasatimezones")
+           vyasaZoneRef.get().
+            then(vyasaZonesQS => {
+                let myResponse = [vyasaZonesQS.docs[0].data()];
+                console.log(`data from firestore db ${JSON.stringify(myResponse)}`)
+
+                // how to convert firestore db timestamp into a jabascript date object.
+                myResponse[0].notified.morning.when = myResponse[0].notified.morning.when.toDate();
+              //  console.log(whenMorning)
+
+
+              //step 2 loop through all records from vyasaZonesQS .._.foreach...
+
+              // step 3  check if now (current moment) is in the current loop item mornnig
+              // Eg. if current loop item is Los_Angsles time zone and now is equal to morning time in this time zone
+               // if there are no push notification sent for today end
+
+               // eg.. if (moment_now_date != current_zone_loop_item. notified.morning.when)
+
+             // then moring notification for this timezone not happended today.
+             // query the database.collection("users") for all users matching this.timeze
+                // e.g if the current_timezone is los_Angeles , query db.collection("users") where zone='los_angeles"
+                // send notification to all those matching users
+                // update current_zone_loop_item. notified.morning.when = now() value
+
+            // continue the innner loop for all users, external loop for all zones.
+
+
+
+
+               
+                res.json(myResponse)
+            })
+       
+
+      //  res.json(notifyRunResponse)
+    }
 
 }
 module.exports = vyasaServicesController;

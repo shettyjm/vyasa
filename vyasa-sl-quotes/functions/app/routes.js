@@ -11,6 +11,13 @@ module.exports = function (app) {
         apiServiceProvider.retrieveQuotes(req, res, db)
     })
 
+    app.get('/notify', function (req, res) {
+
+        console.log("vysa api get notify invoked")
+        apiServiceProvider.notifyNewCycleQuote(req, res, db)
+    })
+
+
 
     app.post('/quotes', function (req, res) {
 
