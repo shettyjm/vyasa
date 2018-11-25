@@ -40,14 +40,15 @@ const admin = require('firebase-admin');
 var serviceAccount = require('./keys/serviceAccount.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  
-    timestampsInSnapshots: true
+  credential: admin.credential.cert(serviceAccount)
   
 });
 
 
 //  refrence to firestore db and pass it in to api controllers
+
+// supress firestore timestamp warning
+admin.firestore().settings( { timestampsInSnapshots: true })
 app.firestoreDb = admin.firestore();
 
 
@@ -70,10 +71,10 @@ app.get('/', (req, res) => res.json({
     message: "api server ok. please invoke a vlaid route"
 }));
 
-const vyasaApis = functions.https.onRequest(app)
+const vyasa = functions.https.onRequest(app)
 
 module.exports = {
-    vyasaApis
+    vyasa
 }
 
 
