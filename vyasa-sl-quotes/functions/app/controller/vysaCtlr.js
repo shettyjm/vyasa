@@ -1,6 +1,5 @@
-
-
 // vyasa apis controlllr
+const iosPushNotificationProvider = require("../utils/iosNotificationProvider");
 const vyasaServicesController = {
 
     // query for quotes data from db
@@ -21,8 +20,8 @@ const vyasaServicesController = {
             // else evening , evneing cycle data
             // query for all the records from db and send it back.
             const quoteRef = db.collection("quotes")
-                // .where("deviceId", "==", req.query.deviceId)
-           //     .limit(1)
+            // .where("deviceId", "==", req.query.deviceId)
+            //     .limit(1)
             quoteRef.get().
             then(quoteQS => {
                 let myResponse = [quoteQS.docs[0].data()];
@@ -97,52 +96,74 @@ const vyasaServicesController = {
 
     // notify through  push noification about a new cycle quote.
 
-    notifyNewCycleQuote :  function(req,res,db){
+    notifyNewCycleQuote: function (req, res, db) {
 
-        let notifyRunResponse = {status: 'OK',
-                                 message : `notication run at ${new Date()}`}
+        let notifyRunResponse = {
+            status: 'OK',
+            message: `notication run at ${new Date()}`
+        }
 
-                            
+
         // daily  notification logic
 
         // step1 1. Get all the zones from 
 
         const vyasaZoneRef = db.collection("vyasatimezones")
-           vyasaZoneRef.get().
-            then(vyasaZonesQS => {
-                let myResponse = [vyasaZonesQS.docs[0].data()];
-                console.log(`data from firestore db ${JSON.stringify(myResponse)}`)
+        vyasaZoneRef.get().
+        then(vyasaZonesQS => {
+            let myResponse = [vyasaZonesQS.docs[0].data()];
+            console.log(`data from firestore db ${JSON.stringify(myResponse)}`)
 
-                // how to convert firestore db timestamp into a jabascript date object.
-                myResponse[0].notified.morning.when = myResponse[0].notified.morning.when.toDate();
-              //  console.log(whenMorning)
+            // how to convert firestore db timestamp into a jabascript date object.
+            myResponse[0].notified.morning.when = myResponse[0].notified.morning.when.toDate();
+            //  console.log(whenMorning)
 
 
-              //step 2 loop through all records from vyasaZonesQS .._.foreach...
+            //step 2 loop through all records from vyasaZonesQS .._.foreach...
 
-              // step 3  check if now (current moment) is in the current loop item mornnig
-              // Eg. if current loop item is Los_Angsles time zone and now is equal to morning time in this time zone
-               // if there are no push notification sent for today end
+            // step 3  check if now (current moment) is in the current loop item mornnig
+            // Eg. if current loop item is Los_Angsles time zone and now is equal to morning time in this time zone
+            // if there are no push notification sent for today end
 
-               // eg.. if (moment_now_date != current_zone_loop_item. notified.morning.when)
+            // eg.. if (moment_now_date != current_zone_loop_item. notified.morning.when)
 
-             // then moring notification for this timezone not happended today.
-             // query the database.collection("users") for all users matching this.timeze
-                // e.g if the current_timezone is los_Angeles , query db.collection("users") where zone='los_angeles"
-                // send notification to all those matching users
-                // update current_zone_loop_item. notified.morning.when = now() value
+            // then moring notification for this timezone not happended today.
+            // query the database.collection("users") for all users matching this.timeze
+            // e.g if the current_timezone is los_Angeles , query db.collection("users") where zone='los_angeles"
+            // send notification to all those matching users
+            // update current_zone_loop_item. notified.morning.when = now() value
 
             // continue the innner loop for all users, external loop for all zones.
 
 
+            // when a zone specific user with device id is ready in the loop
+            let messagePayload = {
+                title: "TODO :sample title text goes here.",
+                message: "TODO : sample message text goes here"
+            }
+
+            let deviceId = "need to get this from users collection on db" // current user in the loop iteration deviceId;
 
 
-               
-                res.json(myResponse)
-            })
-       
+            sendPushNotification(messagePayload, deviceId)
+                .then((pushOutResponse) => {
 
-      //  res.json(notifyRunResponse)
+
+                  //  console.log('pushOutResponse',pushOutResponse)
+                    res.json(myResponse)
+
+                }).catch((error) => {
+                   // console.log('pushOutResponse',error)
+                    
+                    res.json(myResponse)
+
+                })
+
+          
+        })
+
+
+        //  res.json(notifyRunResponse)
     }
 
 }
@@ -166,4 +187,34 @@ function getSchdule(tz) {
 
     })
 
+}
+
+
+function sendPushNotification(payload, deviceId) {
+
+    console.log("Jag will implement the logic here to send out the push notification")
+
+    return new Promise((resolve, reject) => {
+
+
+        let pushpayload = {
+            deviceId: deviceId,
+            title: payload.title,
+            messageText: payload.message,
+            type: " Sample type goes here"
+        }
+
+        iosPushNotificationProvider
+            .publishIOSNotification(pushpayload)
+            .then((success) => {
+                console.log("PushNotificationProvider sucess/completed")
+                resolve(1)
+
+            }).catch((error) => {
+                console.log("PushNotificationProvider errored/completed")
+               
+                reject(0)
+            })
+
+    })
 }
